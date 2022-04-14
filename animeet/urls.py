@@ -13,27 +13,37 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from rest_framework import routers
 
 from shikimori.views import *
 
-from users.views import UserRetrieveDestroyViewSet, UserCreateView, UserListView, GradeCreateView, \
-    GradeUpdateRetrieve
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
-router = routers.DefaultRouter()
-router.register(r'api/v1/users', UserRetrieveDestroyViewSet)
+# router = routers.DefaultRouter()
+# router.register(r'users', UserRetrieveDestroyViewSet)
 # router.register(r'api/v1/grades', )
 # router.register(r'api/v1/grades', GradeViewSet)
 
 urlpatterns = [
+    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('admin/', admin.site.urls),
     path('api/v1/shikirating/', ShikimoriCreateUpdateApiView.as_view()),
-    path('api/v1/users/create/', UserCreateView.as_view()),
-    path('api/v1/users/', UserListView.as_view({'get': 'list'})),
-    path('api/v1/grade/create/', GradeCreateView.as_view()),
-    path('api/v1/grade/create/', GradeUpdateRetrieve.as_view())
+    path('', include('users.urls'))
+    # path('api/v1/users/create/', UserCreateView.as_view()),
+    # path('api/v1/users/', UserListView.as_view({'get': 'list'})),
+    # path('api/v1/grade/create/', GradeCreateView.as_view()),
+    # path('api/v1/grade/update/<int:pk>/', GradeUpdateRetrieve.as_view())
 ]
 
-urlpatterns += router.urls
+# urlpatterns += router.urls
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

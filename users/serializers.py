@@ -1,16 +1,11 @@
 from drf_writable_nested import UniqueFieldsMixin
 from rest_framework import serializers
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.validators import UniqueTogetherValidator
 
-from users.models import User, Grade
-
-from shikimori.models import ShikimoriTitleRating
-
-from users.permissions import IsOwnerOrReadOnly
+from users.models import User, MatchRequest
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    # titles = serializers.PrimaryKeyRelatedField(many=True, queryset=ShikimoriTitleRating.objects.all())
     gender = serializers.CharField(source="get_gender_choices", read_only=True)
 
     # password = serializers.CharField(read_only=True)
@@ -18,52 +13,84 @@ class UserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'phone_number', 'username', 'bio', 'avatar',
-                  'date_of_birth', 'last_time_visit', 'code', 'gender']
+                  'date_of_birth', 'updated_at', 'code', 'gender']
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+
     class Meta:
         model = User
-        fields = ['username', 'phone_number', 'password', 'code']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['username', 'phone_number', 'password', 'password2', 'code']
+        extra_kwargs = {'password': {'style': {'input_type': 'password'}, 'write_only': True, 'required': True}}
 
     def create(self, validated_data):
-        user = User(
-            phone_number=validated_data['phone_number'],
-            code=validated_data['code'],
-            username=validated_data['username'],
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
+        if self.validated_data['password'] == self.validated_data['password2']:
+            validated_data.pop('password2')
+            return User.objects.create_user(**validated_data)
+        else:
+            raise serializers.ValidationError("Password not identical")
 
 
-# class UserListSerializer(serializers.ListSerializer):
-
-
-class GradeCreateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
-    user_id_given = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
-                                                       default=serializers.CurrentUserDefault())
-    user_id_received = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-
-    grade = serializers.ChoiceField(choices=Grade.GRADE_CHOICES)
+class MatchRequestSerializer(serializers.ModelSerializer):
+    # sender = serializers.ReadOnlyField(default=serializers.CurrentUserDefault())
 
     class Meta:
-        model = Grade
-        fields = '__all__'
+        model = MatchRequest
+        fields = ['sender', 'receiver']
+        unique_together = (('sender', 'receiver'),)
+
+        validators = [
+            UniqueTogetherValidator(queryset=MatchRequest.objects.all(), fields=['sender', 'receiver'])
+        ]
+
+    def validate(self, data):
+        sender = data.get('sender')
+        receiver = data.get('receiver')
+        if sender == receiver:
+            raise serializers.ValidationError('Fields are the same')
+        else:
+            return data
 
 
-class GradeSerializer(serializers.ModelSerializer):
-    user_id_given = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
-                                                       default=serializers.CurrentUserDefault(),
-                                                       validators=[])
-    user_id_received = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), validators=[])
-
-    grade = serializers.ChoiceField(choices=Grade.GRADE_CHOICES)
+class MatchedUsersSerializer(serializers.ModelSerializer):
+    user1_id = serializers.IntegerField(required=True)
+    user2_id = serializers.IntegerField(required=True)
 
     class Meta:
-        model = Grade
-        fields = '__all__'
+        model = User
+        fields = ['user1_id', 'user2_id', 'first_name', 'last_name', 'email', 'phone_number', 'gender', 'bio']
 
-
-
+# class GradeCreateSerializer(UniqueFieldsMixin, serializers.ModelSerializer):
+#     user_id_given = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
+#                                                        default=serializers.CurrentUserDefault())
+#     user_id_received = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+#
+#     grade = serializers.ChoiceField(choices=Grade.GRADE_CHOICES)
+#
+#     class Meta:
+#         model = Grade
+#         fields = '__all__'
+#
+#
+# class GradeSerializer(serializers.ModelSerializer):
+#     user_id_given = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
+#                                                        default=serializers.CurrentUserDefault(),
+#                                                        validators=[])
+#     user_id_received = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), validators=[])
+#
+#     grade = serializers.ChoiceField(choices=Grade.GRADE_CHOICES)
+#
+#     class Meta:
+#         model = Grade
+#         fields = '__all__'
+#
+#     def update(self, instance, validated_data):
+#         user_received = User.objects.get(pk=validated_data['pk'])
+#
+#         instance.user_id_given = validated_data.pop['user_id_given']
+#         instance.grade = validated_data.pop['grade']
+#         instance.user_id_received = user_received
+#         instance.save()
+#
+#         return instance
