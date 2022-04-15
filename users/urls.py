@@ -5,7 +5,7 @@ from rest_framework.routers import SimpleRouter, DefaultRouter
 
 router = DefaultRouter()
 router.register(r'requests', views.MatchRequestViewSet)
-router.register(r'users', views.UserRetrieveDestroyViewSet)
+router.register(r'users', views.UserRetrieveUpdateViewSet)
 
 
 # The API URLs are now determined automatically by the router.

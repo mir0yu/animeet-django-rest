@@ -26,4 +26,4 @@ class IsAdminOrIsSelf(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
-        return obj.id == request.user.id | request.user.is_admin
+        return obj.id == request.user.id | request.user.is_staff | request.user.is_admin

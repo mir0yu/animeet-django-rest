@@ -13,18 +13,18 @@ from users.managers import UserManager
 def user_directory_path(instance, filename):
     ext = filename.split('.')[-1]
     filename = "%s.%s" % (uuid.uuid4(), ext)
-    return os.path.join('images/images', filename)
+    return os.path.join('images', filename)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(max_length=60, unique=True, blank=True, null=True)
+    email = models.EmailField(max_length=60, unique=True, blank=False, null=True)
     phone_number = PhoneNumberField(unique=True, null=False, blank=False)
-    username = models.CharField('username', max_length=50, blank=False, null=False)
-    first_name = models.CharField('Фамилия', max_length=50, blank=True, null=True)
-    last_name = models.CharField('Имя', max_length=50, blank=True, null=True)
+    username = models.CharField(verbose_name='Имя пользователя', max_length=50, blank=False, null=False)
+    first_name = models.CharField(verbose_name='Фамилия', max_length=50, blank=True, null=True)
+    last_name = models.CharField(verbose_name='Имя', max_length=50, blank=True, null=True)
     bio = models.TextField(max_length=500, null=False, blank=True)
     avatar = models.ImageField(null=True, blank=True, upload_to=user_directory_path, default='default.jpg')
-    date_of_birth = models.DateField(verbose_name="Дата рождения", null=True, blank=True)
+    date_of_birth = models.DateField(verbose_name="Дата рождения", null=False, blank=False)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -51,7 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['username', 'code', ]
+    REQUIRED_FIELDS = ['username', 'code', 'date_of_birth']
 
     def __str__(self):
         return self.username
@@ -64,6 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'Пользователи'
         ordering = ['-id']
 
+    @property
     def age(self):
         return int((datetime.date.today() - self.date_of_birth).days / 365.25)
 

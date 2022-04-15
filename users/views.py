@@ -9,8 +9,8 @@ from users.permissions import IsAdminOrIsSelf, IsOwnerOrReadOnly
 from users.serializers import UserDetailSerializer, UserCreateSerializer, MatchRequestSerializer, MatchedUsersSerializer
 
 
-class UserRetrieveDestroyViewSet(RetrieveUpdateAPIView,
-                                 viewsets.GenericViewSet):
+class UserRetrieveUpdateViewSet(RetrieveUpdateAPIView,
+                                viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
     permission_classes = [IsAdminOrIsSelf, ]
@@ -24,7 +24,7 @@ class UserListView(viewsets.ReadOnlyModelViewSet):
         current_user = self.request.user
         # genre = self.request.query_params.get('genre', None)
         # radius = self.request.query_params.get('radius', 5)
-        queryset = User.objects.exclude(id=current_user.id, is_admin=True)
+        queryset = User.objects.exclude(id=current_user.id, is_admin=True, gender=current_user.gender)
 
         # if genre is not None:
         #   queryset = queryset.filter(genre=genre)

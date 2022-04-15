@@ -1,27 +1,32 @@
 from drf_writable_nested import UniqueFieldsMixin
-from rest_framework import serializers
+from rest_framework import serializers, fields
+from rest_framework.settings import api_settings
 from rest_framework.validators import UniqueTogetherValidator
 
 from users.models import User, MatchRequest
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    gender = serializers.CharField(source="get_gender_choices", read_only=True)
+    gender = serializers.ChoiceField(choices=User.GENDER_CHOICES, read_only=True)
+    created_at = serializers.DateTimeField(format="%Y-%m-%d")
+
+    # age = serializers.
 
     # password = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'phone_number', 'username', 'bio', 'avatar',
-                  'date_of_birth', 'updated_at', 'code', 'gender']
+        fields = ['id', 'username', 'first_name', 'last_name', 'bio', 'avatar',
+                  'age', 'created_at', 'gender']
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    date_of_birth = serializers.DateField()
 
     class Meta:
         model = User
-        fields = ['username', 'phone_number', 'password', 'password2', 'code']
+        fields = ['username', 'phone_number', 'date_of_birth', 'password', 'password2', 'code']
         extra_kwargs = {'password': {'style': {'input_type': 'password'}, 'write_only': True, 'required': True}}
 
     def create(self, validated_data):
