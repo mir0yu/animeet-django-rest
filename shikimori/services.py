@@ -28,22 +28,3 @@ def fetchDataFromShikiApi(client_code, ):
     return [user_rates, access_token, refresh_token, whoami['id']]
 
 
-# def shikiDatatoSerializer(data, request):
-#     model = []
-#     pprint(data)
-#     # print(ShikimoriTitleRating(data[0][0]['target_id'], data[3], data[0][0]['score']))
-#     # print(data[0][0][1]['target_id'])
-#     for i in range(len(data[0][0])):
-#         sat = ShikimoriTitleSerializer(data={'target_id': data[0][i]['target_id']})
-#         sid = ShikimoriIDSerializer(data={'shikiID': data[3]})
-#         print(sid.data)
-#         print(sat.data)
-#         if sat.is_valid():
-#             sat.save()
-#         if sid.is_valid():
-#             sid.save()
-#         model.append({'title': sat.data.pk, 'owner': sid.data.pk, 'rate': data[0][i]['score']})
-#         # sat.save()
-#         # sid.save()
-#         print(model)
-#     return model

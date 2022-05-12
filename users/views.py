@@ -63,8 +63,7 @@ class MatchedUsersView(generics.ListAPIView):
                 'SELECT request.id, request.sender_id AS user1_id, request.receiver_id AS user2_id, match.first_name, '
                 'match.last_name, match.email, match.gender, match.bio FROM users_matchrequest request LEFT JOIN '
                 'users_matchrequest request2 ON request.receiver_id = request2.sender_id JOIN users_user match ON '
-                'request.receiver_id = match.id WHERE request.sender_id = request2.receiver_id AND request.sender_id '
-                '< request.receiver_id AND request.sender_id = %s',
+                'request.receiver_id = match.id WHERE request.sender_id = request2.receiver_id AND request.sender_id = %s',
                 user_id)
         else:
             queryset = queryset.raw(

@@ -8,7 +8,6 @@ router.register(r'requests', views.MatchRequestViewSet)
 router.register(r'users', views.UserRetrieveUpdateViewSet)
 
 
-# The API URLs are now determined automatically by the router.
 urlpatterns = [
     path('', include(router.urls)),
     path('new/', views.UserCreateView.as_view()),

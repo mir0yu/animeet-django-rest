@@ -1,6 +1,4 @@
-from drf_writable_nested import UniqueFieldsMixin
-from rest_framework import serializers, fields
-from rest_framework.settings import api_settings
+from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from users.models import User, MatchRequest
@@ -9,10 +7,6 @@ from users.models import User, MatchRequest
 class UserDetailSerializer(serializers.ModelSerializer):
     gender = serializers.ChoiceField(choices=User.GENDER_CHOICES, read_only=True)
     created_at = serializers.DateTimeField(format="%Y-%m-%d")
-
-    # age = serializers.
-
-    # password = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
@@ -38,7 +32,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class MatchRequestSerializer(serializers.ModelSerializer):
-    # sender = serializers.ReadOnlyField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = MatchRequest
