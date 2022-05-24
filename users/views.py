@@ -1,5 +1,6 @@
 from rest_framework import viewsets, generics
-from rest_framework.generics import CreateAPIView, RetrieveDestroyAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveDestroyAPIView, RetrieveUpdateAPIView, RetrieveAPIView, \
+    get_object_or_404
 
 from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -13,7 +14,18 @@ class UserRetrieveUpdateViewSet(RetrieveUpdateAPIView,
                                 viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
-    permission_classes = [IsAdminOrIsSelf, ]
+    permission_classes = []
+
+
+class SelfUserView(RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserDetailSerializer
+    permission_classes = [IsAdminOrIsSelf]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = get_object_or_404(User, pk=request.user.pk)
+        serializer = self.get_serializer(instance, many=False)
+        return Response(serializer.data)
 
 
 class UserListView(viewsets.ReadOnlyModelViewSet):
