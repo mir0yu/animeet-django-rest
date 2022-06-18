@@ -5,13 +5,14 @@ from users.models import User, MatchRequest
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    gender = serializers.ChoiceField(choices=User.GENDER_CHOICES, read_only=True)
+    gender = serializers.ChoiceField(choices=User.GENDER_CHOICES, read_only=False)
     created_at = serializers.DateTimeField(format="%Y-%m-%d")
+    date_of_birth = serializers.DateField()
 
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'bio', 'avatar',
-                  'age', 'created_at', 'gender']
+                  'age', 'date_of_birth', 'created_at', 'gender']
 
 
 class UserCreateSerializer(serializers.ModelSerializer):

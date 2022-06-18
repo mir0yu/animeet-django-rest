@@ -26,8 +26,6 @@ class ShikimoriCreateUpdateApiView(APIView):
             serializer_data.append({'title': {'target_id': shikidata[0][i]['target_id']},
                                     'owner': {'shikiID': shikidata[3], 'owner': request.user.id},
                                     'rate': shikidata[0][i]['score']})
-            # print(serializer_data)
-            # print(i, "\n")
         serializer = ShikimoriRatingSimpleSerializer(data=serializer_data, many=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -42,8 +40,6 @@ class ShikimoriCreateUpdateApiView(APIView):
             serializer_data.append({'title': {'target_id': shikidata[0][i]['target_id']},
                                     'owner': {'shikiID': shikidata[3], 'owner': request.user.id},
                                     'rate': shikidata[0][i]['score']})
-            # print(serializer_data)
-            # print(i, "\n")
         serializer = ShikimoriRatingSimpleSerializer(data=serializer_data, many=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -63,15 +59,8 @@ class ShikimoriListUsersRating(ListAPIView):
         data2 = pd.DataFrame(list(queryset2))
         actions2 = tc.SFrame(data2)
         actions = tc.SFrame(data)
-        print(actions)
         training_data, validation_data = tc.recommender.util.random_split_by_user(
             actions.join(actions2, on={'owner_id': 'id'}, how='right'), 'owner', 'title_id')
-        # print(training_data)
         model = tc.factorization_recommender.create(training_data, 'owner', 'title_id', target='rate')
-        # similar = model.predict(training_data)
-        # print(similar)
-        print(model.recommend(users=[self.request.user.pk]))
-        print(model.get_similar_users(users=[self.request.user.pk], k=5))
         similar = model.get_similar_users(users=[self.request.user.pk])['similar']
-        print(similar)
         return User.objects.all().filter(pk__in=similar)
